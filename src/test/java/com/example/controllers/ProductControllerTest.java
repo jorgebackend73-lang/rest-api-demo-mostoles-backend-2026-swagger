@@ -85,49 +85,49 @@ class ProductControllerTest {
 
 	@MockitoBean
 	FileDownloadUtil fileDownloadUtil;
-	
+
 	@MockitoBean
 	FileUtil fileUtil;
-	
+
 	@Autowired
 	ObjectMapper objectMapper;
-	
+
 	List<Product> products = new ArrayList<>();
 	Presentation presentation1, presentation2;
 	Product product1, product2;
 	ProductDto productDto1, productDto2;
-	
+
 	String token;
 	String userToken;
-	
+
 	@BeforeEach
 	void setUp() throws Exception {
-		
+
 		/**
 		 * Necesitamos obtener un token valido para presentarlo en cada test. Se
 		 * obtienen dos: uno de un usuario ADMIN (admin1) y otro de un usuario con rol
 		 * USER (user1), para poder comprobar los enlaces HATEOAS que se anuncian a cada
 		 * uno.
 		 */
-		
+
 		this.token = obtenerToken("admin1", "Temp2026$$##");
-		
+
 		this.userToken = obtenerToken("user1", "Temp2026$$##");
-		
+
 		// ------------------------------------------------------------------------
-		
+
 		presentation1 = Presentation.builder()
 				.name("decenas")
 				.description("Por decenas")
 				.build();
 		presentation1.setId(1);
-		
+
 		presentation2 = Presentation.builder()
 				.name("unidades")
 				.description("Por unidades")
 				.build();
 		presentation2.setId(2);
-			
+
 		product1 = Product.builder()
 				.name("Camara")
 				.description("HP Camara")
@@ -138,7 +138,6 @@ class ProductControllerTest {
 				.build();
 		product1.setId(1);
 
-			
 		product2 = Product.builder()
 				.name("Frigorifico")
 				.description("General Electric")
@@ -148,7 +147,7 @@ class ProductControllerTest {
 				.presentation(presentation2)
 				.build();
 		product2.setId(2);
-		
+
 		products.add(product1);
 		products.add(product2);
 
@@ -195,17 +194,17 @@ class ProductControllerTest {
 	void testFindAll() throws Exception {
 
 		// given
-		
+
 		given(productService.findAll(Sort.by("name")))
-			.willReturn(products);
+				.willReturn(products);
 
 		// when => Realizar la peticion (request) HTTP, mediante el metodo GET
 		// al end point de products ("/products"). Aqui se utiliza MockMvc
 
 		ResultActions response = mockMvc
 				.perform(get("/products")
-				.accept(MediaType.APPLICATION_JSON)
-				.header("Authorization", this.token));
+						.accept(MediaType.APPLICATION_JSON)
+						.header("Authorization", this.token));
 		// then
 
 		response.andExpect(status().isOk()).andDo(print())
@@ -244,7 +243,7 @@ class ProductControllerTest {
 				.param("size", String.valueOf(size))
 				.accept(MediaType.APPLICATION_JSON)
 				.header("Authorization", this.token))
-			.andDo(print())
+				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.productList.size()",
 						is(products.size())))
@@ -280,13 +279,13 @@ class ProductControllerTest {
 		mockMvc.perform(get("/products/{id}", 1)
 				.accept(MediaType.APPLICATION_JSON)
 				.header("Authorization", this.userToken))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.name", is(product1.getName())))
-			.andExpect(jsonPath("$._links.self.href", containsString("/products/1")))
-			.andExpect(jsonPath("$._links['all-products'].href", containsString("/products")))
-			.andExpect(jsonPath("$._links.update").doesNotExist())
-			.andExpect(jsonPath("$._links.delete").doesNotExist());
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.name", is(product1.getName())))
+				.andExpect(jsonPath("$._links.self.href", containsString("/products/1")))
+				.andExpect(jsonPath("$._links['all-products'].href", containsString("/products")))
+				.andExpect(jsonPath("$._links.update").doesNotExist())
+				.andExpect(jsonPath("$._links.delete").doesNotExist());
 	}
 
 	@Test
@@ -301,77 +300,78 @@ class ProductControllerTest {
 		mockMvc.perform(get("/products")
 				.accept(MediaType.APPLICATION_JSON)
 				.header("Authorization", this.userToken))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$._embedded.productList[0]._links.self.href",
-					containsString("/products/1")))
-			.andExpect(jsonPath("$._embedded.productList[0]._links.update").doesNotExist())
-			.andExpect(jsonPath("$._embedded.productList[0]._links.delete").doesNotExist())
-			.andExpect(jsonPath("$._links.create").doesNotExist());
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.productList[0]._links.self.href",
+						containsString("/products/1")))
+				.andExpect(jsonPath("$._embedded.productList[0]._links.update").doesNotExist())
+				.andExpect(jsonPath("$._embedded.productList[0]._links.delete").doesNotExist())
+				.andExpect(jsonPath("$._links.create").doesNotExist());
 	}
 
 	@Test
 	@DisplayName("Controller Test para Persistir un Producto")
-	void testSaveProduct()  {
-		
+	void testSaveProduct() {
+
 		// given
 		given(productService.save(any(Product.class)))
-			.willAnswer(invocation -> {
-				Product productoAGuardar = invocation.getArgument(0);
-				productoAGuardar.setId(1);
-				return productoAGuardar;
-			});
-		
+				.willAnswer(invocation -> {
+					Product productoAGuardar = invocation.getArgument(0);
+					productoAGuardar.setId(1);
+					return productoAGuardar;
+				});
+
 		// when
-		
-		/* Convertir el ProductDto a formato JSON, es decir, una cadena (String)
-		 * en formato de JSON, lo cual hace el objectMapper que hemos inyectado como 
-		 * dependencia al principio de la clase bajo Test */
-		
+
+		/*
+		 * Convertir el ProductDto a formato JSON, es decir, una cadena (String)
+		 * en formato de JSON, lo cual hace el objectMapper que hemos inyectado como
+		 * dependencia al principio de la clase bajo Test
+		 */
+
 		String jsonStringProduct = objectMapper.writeValueAsString(productDto1);
-		
+
 		MockMultipartFile bytesArrayProduct = new MockMultipartFile(
-				    "product", 
-				    null, 
-				    "application/json", 
-				    jsonStringProduct.getBytes());
-		
+				"product",
+				null,
+				"application/json",
+				jsonStringProduct.getBytes());
+
 		try {
-				mockMvc
-				    .perform(multipart("/products")
-					.file(bytesArrayProduct)
-					.file("file", null)
-					.header("Authorization", this.token))			    
-				    	.andDo(print())
-				    	.andExpect(status().isCreated())
-				    	.andExpect(jsonPath("$.name",
-		  			is(product1.getName())))
-				    	.andExpect(jsonPath("$.presentation.id",
-		  			is(presentation1.getId())))
-				    	.andExpect(jsonPath("$._links.self.href",
-		  			containsString("/products/1")));
-		  	
-		  
+			mockMvc
+					.perform(multipart("/products")
+							.file(bytesArrayProduct)
+							.file("file", null)
+							.header("Authorization", this.token))
+					.andDo(print())
+					.andExpect(status().isCreated())
+					.andExpect(jsonPath("$.name",
+							is(product1.getName())))
+					.andExpect(jsonPath("$.presentation.id",
+							is(presentation1.getId())))
+					.andExpect(jsonPath("$._links.self.href",
+							containsString("/products/1")));
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		// then
-		
+
 	}
 
 	@Test
 	@DisplayName("Controller Test para recuperar un producto por su ID")
 	void testRecuperarProductoPorSuID() throws Exception {
-		
+
 		// given
-		
+
 		int productId = 1;
-		
+
 		given(productService.findById(productId))
-			.willReturn(product1);
-		
+				.willReturn(product1);
+
 		// when
 		mockMvc.perform(get("/products/{id}",
 				productId)
@@ -391,87 +391,131 @@ class ProductControllerTest {
 	@Test
 	@DisplayName("Controller Test Producto no encontrado")
 	void testProductoNoEncontrado() throws Exception {
-		
+
 		// given
 		given(productService.findById(20)).willReturn(null);
-		
+
 		// when
-		
+
 		mockMvc.perform(get("/products/{id}", 20)
 				.header("Authorization", this.token))
-			.andDo(print())
-			.andExpect(status().isNotFound());
+				.andDo(print())
+				.andExpect(status().isNotFound());
 	}
-	
-    @Test 
-    @DisplayName("Controller Test que actualiza un producto con su imagen")
-    void testUpdateProduct() throws Exception{
 
-        //given
-        int id = 1;
-        given(productService.findById(id)).willReturn(product1);
-        given(productService.save(any(Product.class)))
-                .willAnswer(invocation -> invocation.getArgument(0));
+	/**
+	 * Para lanzar este test desde la terminal, con maven:
+	 * 
+	 * ./mvnw test
+	 * -Dtest=ProductControllerTest#testProductosPorPresentacionUsuarioNoAutenticado
+	 */
+	@Test
+	@DisplayName("Controller Test que recupera los productos de una presentacion con un usuario no autenticado")
+	void testProductosPorPresentacionUsuarioNoAutenticado() throws Exception {
 
-        //when
-        String jsonStringProduct = objectMapper.writeValueAsString(productDto1);
+		// given
+		String presentationName = presentation2.getName();
 
-        MockMultipartFile bytesArrayProduct = new MockMultipartFile("product", 
-                            null,
-                            "application/json",
-                            jsonStringProduct.getBytes());
+		// when / then: sin la cabecera Authorization el usuario no esta autenticado,
+		// asi que la peticion es rechazada con un 401 (UNAUTHORIZED)
+		mockMvc.perform(get("/products/products-by-presentation")
+				.param("presentation", presentationName)
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isUnauthorized());
+	}
 
-        ResultActions response = this.mockMvc
-        		.perform(multipart("/products/{id}", id)
-                        .with(request -> {
-                            request.setMethod("PUT");
-                            return request;
-                        })
-                        .file("image", null)
-                        .file(bytesArrayProduct)
-                        .header("Authorization", this.token));
+	/**
+	 * Para lanzar este test desde la terminal, con maven:
+	 * 
+	 * ./mvnw test
+	 * -Dtest=ProductControllerTest#testProductosPorPresentacionUsuarioRegistrado
+	 */
+	@Test
+	@DisplayName("Controller Test que recupera los productos de una presentacion con un usuario registrado")
+	void testProductosPorPresentacionUsuarioRegistrado() throws Exception {
 
-        //then
-        response.andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name",
-            		is(product1.getName())))
-            .andExpect(jsonPath("$.description",
-            		is(product1.getDescription())))
-            .andExpect(jsonPath("$.presentation.id",
-            		is(presentation1.getId())))
-            .andExpect(jsonPath("$._links.self.href",
-            		containsString("/products/1")));
-        
+		// given
+		String presentationName = presentation2.getName();
 
-    }
-    
-    @Test 
-    @DisplayName("Controller Test que elimina un producto")
-    void testDeleteProduct() throws Exception{
+		given(productService.findByPresentationName(presentationName))
+				.willReturn(List.of(product2));
 
-        //given
-        int ProductId = 1;
+		// when
+		ResultActions response = mockMvc
+				.perform(get("/products/products-by-presentation")
+						.param("presentation", presentationName)
+						.accept(MediaType.APPLICATION_JSON)
+						.header("Authorization", this.userToken));
 
-        given(productService.findById(ProductId)).willReturn(product1);
-        doNothing().when(productService).delete(product1);
+		// then
+		response.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.productList.size()",
+						is(1)))
+				.andExpect(jsonPath("$._embedded.productList[0].name",
+						is(product2.getName())))
+				.andExpect(jsonPath("$._embedded.productList[0].presentation.name",
+						is(presentationName)));
+	}
 
-        //when
-        mockMvc.perform(delete("/products/{id}", ProductId)
-        		.header("Authorization", this.token))
-                .andExpect(status().isOk());
+	@Test
+	@DisplayName("Controller Test que actualiza un producto con su imagen")
+	void testUpdateProduct() throws Exception {
 
-    }
-	
+		// given
+		int id = 1;
+		given(productService.findById(id)).willReturn(product1);
+		given(productService.save(any(Product.class)))
+				.willAnswer(invocation -> invocation.getArgument(0));
+
+		// when
+		String jsonStringProduct = objectMapper.writeValueAsString(productDto1);
+
+		MockMultipartFile bytesArrayProduct = new MockMultipartFile("product",
+				null,
+				"application/json",
+				jsonStringProduct.getBytes());
+
+		ResultActions response = this.mockMvc
+				.perform(multipart("/products/{id}", id)
+						.with(request -> {
+							request.setMethod("PUT");
+							return request;
+						})
+						.file("image", null)
+						.file(bytesArrayProduct)
+						.header("Authorization", this.token));
+
+		// then
+		response.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.name",
+						is(product1.getName())))
+				.andExpect(jsonPath("$.description",
+						is(product1.getDescription())))
+				.andExpect(jsonPath("$.presentation.id",
+						is(presentation1.getId())))
+				.andExpect(jsonPath("$._links.self.href",
+						containsString("/products/1")));
+
+	}
+
+	@Test
+	@DisplayName("Controller Test que elimina un producto")
+	void testDeleteProduct() throws Exception {
+
+		// given
+		int ProductId = 1;
+
+		given(productService.findById(ProductId)).willReturn(product1);
+		doNothing().when(productService).delete(product1);
+
+		// when
+		mockMvc.perform(delete("/products/{id}", ProductId)
+				.header("Authorization", this.token))
+				.andExpect(status().isOk());
+
+	}
+
 }
-
-
-
-
-
-
-
-
-
-
-
